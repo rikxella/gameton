@@ -27,6 +27,12 @@ def do_move(ants):
         body["movers"].append({"ant": ant[0], "path": ant[1]})
     requests.post(MOVE_ENDPOINT, params={"token": TOKEN}, json=body)
 
+
+def serialize_data(coord: tuple[int, int]) -> dict[str, int]:
+    q, r = coord
+    return {"q": q, "r": r}
+
+
 def get_path(pos):
     pass
 
