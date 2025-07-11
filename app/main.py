@@ -7,29 +7,31 @@ from random import choice
 import numpy as np
 from numpy import array as vec
 
-BASE_URL = "https://games.datsteam.dev"  # Используем боевой сервер
+BASE_URL = "https://games-test.datsteam.dev"  # Используем боевой сервер
 REGISTER_ENDPOINT = f"{BASE_URL}/api/register"
-STATE_ENDPOINT = f"{BASE_URL}/api/state"
+STATE_ENDPOINT = f"{BASE_URL}/api/arena"
 MOVE_ENDPOINT = f"{BASE_URL}/api/move"
 
-TOKEN = ""
+TOKEN = "dfa8e467-bd0f-48c1-921d-9fc81f11a831"
 DIRECTIONS = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
 ant_memory = {}
 
 def register_round():
     resp = requests.post(REGISTER_ENDPOINT, params={'token': TOKEN})
-    return resp.json['nextTurn']
+    print(resp.json())
+    return resp.json()['nextTurn']
 
 
 def add_coords(a, b):
     return [a[0] + b[0], a[1] + b[1]]
 
 def do_move(ants):
-    body = {"movers":[]}
+    body = {"moves":[]}
     for ant in ants:
-        body["movers"].append({"ant": ant[0], "path": ant[1]})
-    requests.post(MOVE_ENDPOINT, params={"token": TOKEN}, json=body)
+        body["moves"].append({"ant": ant[0], "path": ant[1]})
+    resp  = requests.post(MOVE_ENDPOINT, params={"token": TOKEN}, json=body)
+    print(body)
 
 
 def serialize_data(coord: tuple[int, int]) -> dict[str, int]:
@@ -43,10 +45,11 @@ def get_path(pos):
 def do_return(ant_uid, speed):
     global ant_memory
     if ant_uid not in ant_memory:
-        raise KeyError(f"THER'S NO SUCH ANT AS {ant_uid}")
+        # raise KeyError(f"THER'S NO SUCH ANT AS {ant_uid}")
+        return None
     path = []
     while len(path) < speed and len(ant_memory[ant_uid]) > 0:
-        path.append(ant_memory.pop())
+        path.append(ant_memory[ant_uid].pop())
     return path
     
 def update_memory(uid,path):
@@ -56,6 +59,9 @@ def update_memory(uid,path):
         return
     for p in path:
         ant_memory[uid].append(p)
+
+def get_speed(type):
+    return 1
     
 
 def choose_next_path(pos: tuple[int], prev_pos: tuple[int] = None, speed: int = 1) -> tuple[tuple[int, int]]:
@@ -80,16 +86,23 @@ ttl = register_round()
 time.sleep(ttl)
 while True:
     state = requests.get(STATE_ENDPOINT, params={"token": TOKEN}).json()
+    print(state)
     ttl = state['nextTurnIn']
     try:
         units = state.get("ants", [])
         moves = []
         for unit in units:
             uid = unit["id"]
-            pos = (unit["r"], unit["q"])
-            new_path = choose_next_path(pos)
-            update_memory(uid, new_path)
-            moves.append((uid, new_path))
+            pos = (unit["q"], unit["r"])                
+            new_path = choose_next_path(pos, None, get_speed(unit['type']))[0]
+            #print(new_path)
+            if unit['food']['amount']!=0:
+                new_path = do_return(uid,get_speed(unit['type']))
+            else:
+                update_memory(uid, new_path)
+            if new_path is None:
+                continue
+            moves.append((uid, [serialize_data(i) for i in new_path]))
         do_move(moves)
 
     except Exception as e:
