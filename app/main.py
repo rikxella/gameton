@@ -40,12 +40,18 @@ def serialize_data(coord: tuple[int, int]) -> dict[str, int]:
 def get_path(pos):
     pass
 
-def do_return(ant_uid,speed):
-
+def do_return(ant_uid, speed):
+    global ant_memory
+    if ant_uid not in ant_memory:
+        raise KeyError(f"THER'S NO SUCH ANT AS {ant_uid}")
+    path = []
+    while len(path) < speed and len(ant_memory[ant_uid]) > 0:
+        path.append(ant_memory.pop())
+    return path
     
 def update_memory(uid,path):
     global ant_memory
-    if uid in ant_memory.keys():
+    if uid not in ant_memory.keys():
         ant_memory[uid] = path
         return
     for p in path:
