@@ -15,7 +15,11 @@ MOVE_ENDPOINT = f"{BASE_URL}/api/move"
 TOKEN = ""
 DIRECTIONS = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
-ant_memory = {}  
+ant_memory = {}
+
+def register_round():
+    resp = requests.post(REGISTER_ENDPOINT, params={'token': TOKEN})
+    return resp.json['nextTurn']
 
 
 def add_coords(a, b):
@@ -60,24 +64,22 @@ def choose_next_path(pos: tuple[int], prev_pos: tuple[int] = None, speed: int = 
     path = list(map(lambda x: x.tolist(), path))
     return [path, (-vec(new_path)).tolist()]
 
-
+ttl = register_round()
+time.sleep(ttl)
 while True:
+    state = requests.get(STATE_ENDPOINT, params={"token": TOKEN}).json()
+    ttl = state['nextTurnIn']
     try:
-        state = requests.get(STATE_ENDPOINT, params={"token": TOKEN}).json()
-        units = state.get("units", [])
-        my_nest = state.get("myNestPosition")
-        visible = state.get("visible", {})
-
-        #render_map(units, visible, my_nest)
+        units = state.get("ants", [])
         moves = []
         for unit in units:
             uid = unit["id"]
-            pos = unit["position"]
-            new_path = choose_next_path((pos['r'], pos['q']))
+            pos = (unit["r"], unit["q"])
+            new_path = choose_next_path(pos)
             update_memory(uid, new_path)
             moves.append((uid, new_path))
         do_move(moves)
 
     except Exception as e:
         print("Ошибка:", e)
-        time.sleep(2)
+    time.sleep(ttl)
