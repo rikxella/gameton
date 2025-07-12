@@ -62,7 +62,7 @@ class BaseExpansion:
         path = [vec(pos) + (i + 1) * np.array(new_path) for i in range(speed)]
         path = list(map(lambda x: x.tolist(), path))
         return [path, (-vec(new_path)).tolist()]
-    
+
     def __call__(self, state):
         units = state.get("ants", [])
         moves = []
@@ -88,14 +88,14 @@ def mock_event_loop():
     STATE_ENDPOINT = f"{BASE_URL}/api/arena"
     MOVE_ENDPOINT = f"{BASE_URL}/api/move"
 
-    TOKEN = os.env("API_TOKEN")
+    TOKEN = os.environ.get("API_TOKEN")
 
     def register_round():
-        resp = requests.post(REGISTER_ENDPOINT, params={'token': TOKEN})
+        resp = requests.post(REGISTER_ENDPOINT, params={"token": TOKEN})
         print(resp.json())
-        return resp.json()['nextTurn']
-        ttl = register_round()
-        time.sleep(ttl)
+        return resp.json()["nextTurn"]
+    ttl = register_round()
+    time.sleep(ttl)
 
     policy = BaseExpansion(TOKEN=TOKEN, MOVE_ENDPOINT=MOVE_ENDPOINT)
     while True:
@@ -103,7 +103,10 @@ def mock_event_loop():
         print(state)
         ttl = state["nextTurnIn"]
         try:
-            policy()
+            policy(state)
         except Exception as e:
             print("Ошибка:", e)
         time.sleep(ttl)
+
+
+mock_event_loop()
