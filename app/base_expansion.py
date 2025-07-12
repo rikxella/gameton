@@ -87,7 +87,7 @@ def mock_event_loop(render=True):
     if render:
         from visualizer import HexGridVisualizer
         path = time.time_ns()
-        os.mkdir(path)
+        os.mkdir(str(path))
 
     BASE_URL = "https://games-test.datsteam.dev"  # Используем боевой сервер
     REGISTER_ENDPOINT = f"{BASE_URL}/api/register"
