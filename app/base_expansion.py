@@ -7,6 +7,8 @@ import numpy as np
 import requests
 from numpy import array as vec
 
+from matplotlib import pyplot as plt
+
 
 class BaseExpansion:
     def __init__(self, TOKEN, MOVE_ENDPOINT, ant_memory={}):
@@ -81,7 +83,11 @@ class BaseExpansion:
         self.do_move(moves)
 
 
-def mock_event_loop():
+def mock_event_loop(render=True):
+    if render:
+        from visualizer import HexGridVisualizer
+        path = time.time_ns()
+        os.mkdir(path)
 
     BASE_URL = "https://games-test.datsteam.dev"  # Используем боевой сервер
     REGISTER_ENDPOINT = f"{BASE_URL}/api/register"
@@ -104,9 +110,13 @@ def mock_event_loop():
         ttl = state["nextTurnIn"]
         try:
             policy(state)
+            if render:
+                visualizer = HexGridVisualizer(state)
+                visualizer.visualize(save=True, path=path)
+                plt.close()
         except Exception as e:
             print("Ошибка:", e)
         time.sleep(ttl)
 
 
-mock_event_loop()
+mock_event_loop(render=True)

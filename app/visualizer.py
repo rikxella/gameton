@@ -5,6 +5,9 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 
+import time
+import os
+
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import RegularPolygon
 
@@ -139,7 +142,7 @@ class HexGridVisualizer:
             )
             self.ax.add_patch(hexagon)
     
-    def visualize(self):
+    def visualize(self, save=False, path=""):
         """Основной метод визуализации"""
         self.draw_map()
         self.draw_food()
@@ -169,7 +172,11 @@ class HexGridVisualizer:
         self.ax.legend(handles=legend_elements, loc='upper right', 
                       bbox_to_anchor=(1.25, 1), fontsize=10, title="Легенда")
         
-        plt.show()
+        if save:
+            plt.savefig(os.path.join(path, f"image_{time.time()}.png"))
+        else:
+            plt.show()
+
 
 
 @click.command()
@@ -181,6 +188,9 @@ def main(json_file):
     
     visualizer = HexGridVisualizer(game_data)
     visualizer.visualize()
+    import time
+    time.sleep(0.5)
+    plt.close('all')
 
 
 # Пример использования
