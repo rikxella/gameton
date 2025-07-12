@@ -12,7 +12,7 @@ REGISTER_ENDPOINT = f"{BASE_URL}/api/register"
 STATE_ENDPOINT = f"{BASE_URL}/api/arena"
 MOVE_ENDPOINT = f"{BASE_URL}/api/move"
 
-TOKEN = "dfa8e467-bd0f-48c1-921d-9fc81f11a831"
+TOKEN = os.env("API_TOKEN")
 DIRECTIONS = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
 ant_memory = {}
