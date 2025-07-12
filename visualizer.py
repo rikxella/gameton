@@ -165,7 +165,7 @@ class HexGridVisualizer:
 
 
 @click.command()
-@click.option("--json_file", "-j", help="path to JSON to render", default="sample_json.json")
+@click.option("--json_file", "-j", help="path to JSON to render", default="app/example.json")
 def main(json_file):
 
     with open(json_file, "r") as stream:
