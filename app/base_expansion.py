@@ -86,7 +86,7 @@ class BaseExpansion:
 def mock_event_loop(render=True):
     if render:
         from visualizer import HexGridVisualizer
-        path = time.time_ns()
+        path = str(time.time_ns())
         os.mkdir(str(path))
 
     BASE_URL = "https://games-test.datsteam.dev"  # Используем боевой сервер
